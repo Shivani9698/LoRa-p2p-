@@ -1,0 +1,37 @@
+
+
+int redLed = 2;
+//int greenLed = 33;
+//int buzzer = 27;
+int smokeA0 =26;
+// Your threshold value
+int sensorThres = 80;
+
+void setup() {
+ // pinMode(redLed, OUTPUT);
+ // pinMode(greenLed, OUTPUT);
+ // pinMode(buzzer, OUTPUT);
+  pinMode(smokeA0, INPUT);
+  Serial.begin(115200);
+}
+
+void loop() {
+  int analogSensor = analogRead(smokeA0);
+
+  Serial.print("Pin A0: ");
+  Serial.println(analogSensor);
+  // Checks if it has reached the threshold value
+  if (analogSensor > sensorThres)
+  {
+    digitalWrite(2, HIGH);
+    Serial.println("DANGER");
+    //tone(buzzer, 1000, 200);
+  }
+  else
+  {
+    //digitalWrite(2, LOW);
+Serial.println("SAFE");
+   // noTone(buzzer);
+  }
+  delay(100);
+}
