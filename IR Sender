@@ -8,7 +8,7 @@
 #define rst 14
 #define dio0 2
 
-const int IR_Sensor = 12;
+const int IR_Sensor = 26;
 
 int counter = 0;
 
