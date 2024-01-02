@@ -1,0 +1,65 @@
+#include <SPI.h>
+#include <LoRa.h>
+
+//define the pins used by the transceiver module
+#define ss 5
+#define rst 14
+#define dio0 2
+#define DOOR_SENSOR_PIN  26 // ESP32 pin GPIO23 connected to the OUTPUT pin of door sensor
+#define LED_PIN          13  // ESP32 pin GPIO17 connected to LED's pin
+
+int doorState;
+
+int counter = 0;
+
+void setup() {
+  //initialize Serial Monitor
+  Serial.begin(115200);
+   pinMode(DOOR_SENSOR_PIN, INPUT_PULLUP); // set ESP32 pin to input pull-up mode
+  pinMode(LED_PIN, OUTPUT);       
+  while (!Serial);
+  Serial.println("LoRa Sender");
+
+  //setup LoRa transceiver module
+  LoRa.setPins(ss, rst, dio0);
+  
+  //replace the LoRa.begin(---E-) argument with your location's frequency 
+  //433E6 for Asia
+  //866E6 for Europe
+  //915E6 for North America
+  while (!LoRa.begin(868E6)) {
+    Serial.println(".");
+    delay(500);
+  }
+   // Change sync word (0xF3) to match the receiver
+  // The sync word assures you don't get LoRa messages from other LoRa transceivers
+  // ranges from 0-0xFF
+  LoRa.setSyncWord(0xF3);
+  Serial.println("LoRa Initializing OK!");
+}
+
+void loop() {
+  Serial.print("Sending packet: ");
+  Serial.println(counter);
+
+  //Send LoRa packet to receiver
+  LoRa.beginPacket();
+  doorState = digitalRead(DOOR_SENSOR_PIN); // read state
+
+  if (doorState == HIGH) {
+    Serial.println("The door is open, turns on LED");
+    LoRa.println("The door is open, turns on LED");
+    digitalWrite(LED_PIN, HIGH); // turn on LED
+  } else {
+    Serial.println("The door is closed, turns off LED");
+    LoRa.println("The door is closed, turns off LED");
+    digitalWrite(LED_PIN, LOW);  // turn off LED
+  }
+ 
+  LoRa.print(counter);
+  LoRa.endPacket();
+
+  counter++;
+
+  delay(1000);
+}
