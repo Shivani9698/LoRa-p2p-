@@ -8,7 +8,7 @@
 #define rst 14
 #define dio0 2
 
-const int trigPin = 12;
+const int trigPin = 26;
 const int echoPin = 13;
 
 //define sound velocity in cm/uS
