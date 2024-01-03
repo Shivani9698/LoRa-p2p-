@@ -1,0 +1,75 @@
+#include <SPI.h>
+#include <LoRa.h>
+
+// Define the pins used by the transceiver module
+#define ss 5
+#define rst 14
+#define dio0 2
+#define timeSeconds 10
+const int motionSensor = 26;
+
+// Timer: Auxiliary variables
+unsigned long now;
+unsigned long lastTrigger = 0;
+boolean startTimer = false;
+int counter = 0;
+
+void IRAM_ATTR detectsMovement() {
+  startTimer = true;
+  lastTrigger = millis();
+}
+
+void setup() {
+  // Initialize Serial Monitor
+  Serial.begin(115200);
+  
+  pinMode(motionSensor, INPUT_PULLUP);
+  // Set motionSensor pin as interrupt, assign interrupt function and set RISING mode
+  attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
+
+  while (!Serial);
+  Serial.println("LoRa Sender");
+
+  // Setup LoRa transceiver module
+  LoRa.setPins(ss, rst, dio0);
+  
+  // Replace the LoRa.begin(---E-) argument with your location's frequency 
+  // 433E6 for Asia, 866E6 for Europe, 915E6 for North America
+  while (!LoRa.begin(868E6)) {
+    Serial.println(".");
+    delay(500);
+  }
+
+  // Change sync word (0xF3) to match the receiver
+  LoRa.setSyncWord(0xF3);
+  Serial.println("LoRa Initializing OK!");
+}
+
+void loop() {
+  Serial.print("Sending packet: ");
+  Serial.println(counter);
+
+  // Send LoRa packet to receiver
+  LoRa.beginPacket();
+  now = millis();
+
+  if (!startTimer) {
+    Serial.println("MOTION DETECTED!!!");
+    LoRa.println("MOTION DETECTED!!!");
+    startTimer = true;
+  }
+
+  // Turn off the LED after the number of seconds defined in the timeSeconds variable
+  if (startTimer && (now - lastTrigger > (timeSeconds * 1000))) {
+    Serial.println("Motion stopped...");
+    LoRa.println("Motion stopped...");
+    startTimer = false;
+  }
+
+  delay(100);
+  LoRa.print(counter);
+  LoRa.endPacket();
+  counter++;
+
+  delay(1000);
+}
