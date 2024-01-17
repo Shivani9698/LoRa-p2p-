@@ -1,0 +1,96 @@
+#include <SPI.h>
+#include <LoRa.h>
+
+
+
+//define the pins used by the transceiver module
+#define ss 5
+#define rst 14
+#define dio0 2
+
+const int trigPin = 26;
+const int echoPin = 13;
+
+//define sound velocity in cm/uS
+#define SOUND_VELOCITY 0.034
+#define CM_TO_INCH 0.393701
+
+long duration;
+float distanceCm;
+float distanceInch;
+
+int counter = 0;
+
+void setup() {
+  //initialize Serial Monitor
+  Serial.begin(115200);
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  while (!Serial);
+  Serial.println("LoRa Sender");
+
+  //setup LoRa transceiver module
+  LoRa.setPins(ss, rst, dio0);
+  
+  //replace the LoRa.begin(---E-) argument with your location's frequency 
+  //433E6 for Asia
+  //866E6 for Europe
+  //915E6 for North America
+  while (!LoRa.begin(868E6)) {
+    Serial.println(".");
+    delay(500);
+  }// Sender connect kro
+   // Change sync word (0xF3) to match the receiver
+  // The sync word assures you don't get LoRa messages from other LoRa transceivers
+  // ranges from 0-0xFF
+  LoRa.setSyncWord(0xF3);
+  Serial.println("LoRa Initializing OK!");
+   
+}
+
+void loop() {
+  
+ digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  
+  // Calculate the distance
+  distanceCm = duration * SOUND_VELOCITY/2;
+  
+  // Convert to inches
+  distanceInch = distanceCm * CM_TO_INCH;
+  
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance (cm): ");
+  Serial.println(distanceCm);
+  Serial.print("Distance (inch): ");
+  Serial.println(distanceInch);
+  
+  delay(1000);
+
+  Serial.print("Sending packet: ");
+  Serial.println(counter);
+
+  LoRa.beginPacket();
+//  LoRa.print("hello ");
+//  LoRa.print(counter);
+
+  LoRa.print("Distance (cm): ");
+  LoRa.print(distanceCm);
+   LoRa.print("Distance (inch): ");
+  LoRa.print(distanceInch);
+  LoRa.print(  counter);
+
+  LoRa.endPacket();
+
+  counter++;
+  
+
+  delay(1000);
+}
