@@ -49,12 +49,14 @@ void loop() {
   if (analogSensor > sensorThres)
   {
     digitalWrite(2, HIGH);
+ LoRa.print("DANGER ");
     LoRa.print("DANGER ");
   LoRa.print(counter);
   }
   else
   {
     digitalWrite(2, LOW);
+ LoRa.print("SAFE ");
   LoRa.print("SAFE ");
   LoRa.print(counter);
   }
