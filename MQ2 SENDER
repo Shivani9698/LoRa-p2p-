@@ -5,7 +5,7 @@
 #define ss 5
 #define rst 14
 #define dio0 2
- int smokeA0 =36;
+ int smokeA0 =26;
 // Your threshold value
 int sensorThres = 60;
 
