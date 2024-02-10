@@ -7,7 +7,7 @@
 #define dio0 2
  int smokeA0 =26;
 // Your threshold value
-int sensorThres = 60;
+int sensorThres = 100;
 
 int counter = 0;
 
@@ -49,14 +49,14 @@ void loop() {
   if (analogSensor > sensorThres)
   {
     digitalWrite(2, HIGH);
- LoRa.print("DANGER ");
+ Serial.print("DANGER ");
     LoRa.print("DANGER ");
   LoRa.print(counter);
   }
   else
   {
     digitalWrite(2, LOW);
- LoRa.print("SAFE ");
+ Serial.print("SAFE ");
   LoRa.print("SAFE ");
   LoRa.print(counter);
   }
